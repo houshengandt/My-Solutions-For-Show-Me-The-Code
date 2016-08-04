@@ -1,39 +1,108 @@
+import wave
+import pyaudio
 import json
 import uuid
 import base64
+import re
+import webbrowser
 from urllib.request import Request, urlopen, HTTPError, URLError
 
-mac_address=uuid.UUID(int=uuid.getnode()).hex[-12:]
+# 录音阶段常量
+CHUNK = 1024
+FORMAT = pyaudio.paInt16
+CHANNELS = 1
+RATE = 8000
+RECORD_SECONDS = 5
+WAVE_OUTPUT_FILENAME = "wave.wav"
+
+
+# 识别阶段常量
+mac_address = uuid.UUID(int=uuid.getnode()).hex[-12:]
 url = "http://vop.baidu.com/server_api"
 access_token = "24.2de162e4a21f37d66dc8276ed4d21eb0.2592000.1472696088.282335-8449392"
-with open("wave.wav", 'rb') as f:
-    spee = f.read()
-    base64_wave = base64.b64encode(spee).decode("utf-8")
-length = len(spee)
 
-content = {
-    "format": "wav",
-    "rate": 8000,
-    "channel": '1',
-    "token": access_token,
-    "cuid": mac_address,
-    'lan': 'zh',
-    "len": length,
-    "speech": base64_wave,
-}
 
-json_data = json.dumps(content).encode('utf-8')
-json_length = len(json_data)
+def record_wave(p):
+    # 参考 pyaudio 文档例子
+    stream = p.open(format=FORMAT,
+                    channels=CHANNELS,
+                    rate=RATE,
+                    input=True,
+                    frames_per_buffer=CHUNK)
 
-header = {
-    'Content-Type': 'application/json; charset=utf-8',
-    'Content-length': json_length,
-}
+    print("* 正在录音......")
 
-req = Request(url, data=json_data, headers=header)
-try:
-    res = urlopen(url=req)
-    print(res.read().decode())
-except URLError or HTTPError as err:
-    print(err)
+    frames = []
 
+    for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
+        data = stream.read(CHUNK)
+        frames.append(data)
+
+    print("* 录音完毕......")
+
+    stream.stop_stream()
+    stream.close()
+    p.terminate()
+
+    wf = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
+    wf.setnchannels(CHANNELS)
+    wf.setsampwidth(p.get_sample_size(FORMAT))
+    wf.setframerate(RATE)
+    wf.writeframes(b''.join(frames))
+    wf.close()
+
+
+def speech_text(wav):
+    with open(wav, 'rb') as f:
+        spee = f.read()
+        base64_wave = base64.b64encode(spee).decode("utf-8")
+
+    length = len(spee)    # 需要提供原始文件长度
+
+    content = {
+        "format": "wav",
+        "rate": 8000,
+        "channel": '1',
+        "token": access_token,
+        "cuid": mac_address,
+        'lan': 'zh',
+        "len": length,
+        "speech": base64_wave,
+    }
+
+    json_data = json.dumps(content).encode('utf-8')
+    json_length = len(json_data)    # 要写在header的Content-length里
+
+    header = {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Content-length': json_length,
+    }
+
+    req = Request(url, data=json_data, headers=header)
+    try:
+        print("* 正在上传录音......")
+        res = urlopen(url=req)
+        resp = res.read().decode()
+        return resp
+    except URLError or HTTPError as err:
+        print("* 录音上传失败......")
+        print(err)
+
+
+def handle_text(tex):
+    tex1 = tex.replace('[', '')
+    tex2 = tex1.replace(']', '')
+    dic = eval(tex2)
+    result = dic['result']
+    print("* 识别结果：" + result)
+    if re.search(r'\sbaidu|百度|\s', result):
+        u = 'http://www.baidu.com'
+        webbrowser.open(u)
+        print(webbrowser.get())
+    else:
+        print("* 失败......")
+
+
+if __name__ == "__main__":
+    record_wave(pyaudio.PyAudio())
+    handle_text(speech_text("wave.wav"))
