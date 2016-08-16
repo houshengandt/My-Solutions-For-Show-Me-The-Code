@@ -26,7 +26,9 @@ WAVE_OUTPUT_FILENAME = "wave.wav"
 # 识别阶段常量
 mac_address = uuid.UUID(int=uuid.getnode()).hex[-12:]
 url = "http://vop.baidu.com/server_api"
-access_token = "24.2de162e4a21f37d66dc8276ed4d21eb0.2592000.1472696088.282335-8449392"
+apikey = "TQGa9ibae2GoWHHQEU2WvoAN"     # 百度语音应用的API KEY
+secretkey = "d58cf41ac479d2ed6d6afcf309170d16"      # 百度语音应用的 SECRET KEY
+u1 = "https://openapi.baidu.com/oauth/2.0/token?grant_type=client_credentials&"
 
 
 def record_wave(p):
@@ -59,7 +61,13 @@ def record_wave(p):
     wf.close()
 
 
-def speech_text(wav):
+def get_access_token():
+    u2 = u1 + "client_id=" + apikey + "&client_secret=" + secretkey + "&"
+    di = eval(urlopen(u2).read())
+    return di['access_token']
+
+
+def speech_text(wav, access_token):
     with open(wav, 'rb') as f:
         spee = f.read()
         base64_wave = base64.b64encode(spee).decode("utf-8")
@@ -113,4 +121,4 @@ def handle_text(tex):
 
 if __name__ == "__main__":
     record_wave(pyaudio.PyAudio())
-    handle_text(speech_text("wave.wav"))
+    handle_text(speech_text("wave.wav", get_access_token()))
