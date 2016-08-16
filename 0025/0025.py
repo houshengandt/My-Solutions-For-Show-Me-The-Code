@@ -63,11 +63,14 @@ def record_wave(p):
 
 def get_access_token():
     u2 = u1 + "client_id=" + apikey + "&client_secret=" + secretkey + "&"
-    di = eval(urlopen(u2).read())
-    return di['access_token']
+    try:
+        di = eval(urlopen(u2).read())
+        return di['access_token']
+    except URLError or HTTPError as err0:
+        print(err0)
 
 
-def speech_text(wav, access_token):
+def speech_text(wav, access_token="24.20b7b145256cbc85e011bc04cdbd4f90.2592000.1473914363.282335-8449392"):
     with open(wav, 'rb') as f:
         spee = f.read()
         base64_wave = base64.b64encode(spee).decode("utf-8")
