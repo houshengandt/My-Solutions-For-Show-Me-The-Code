@@ -3,9 +3,16 @@ import pyaudio
 import json
 import uuid
 import base64
-import re
 import webbrowser
 from urllib.request import Request, urlopen, HTTPError, URLError
+
+
+#网站列表
+website  = {
+    'www.baidu.com': 'ｂａｉｄｕ，baidu,百度,白度,白，度，b a i d u, ｂａｉｄｕ，',
+    'www.weibo.com': "微博，微，博",
+    'www.google.com': '谷歌，谷，歌，'
+}
 
 # 录音阶段常量
 CHUNK = 1024
@@ -95,10 +102,11 @@ def handle_text(tex):
     dic = eval(tex2)
     result = dic['result']
     print("* 识别结果：" + result)
-    if re.search(r'\sbaidu|百度|\s', result):
-        u = 'http://www.baidu.com'
-        webbrowser.open(u)
-        print(webbrowser.get())
+    for key, value in website.items():
+        if result in value:
+            webbrowser.open(key)
+            print("* 正在打开:" + key)
+            break
     else:
         print("* 失败......")
 
