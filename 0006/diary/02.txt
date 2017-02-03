@@ -1,0 +1,8 @@
+Hash functions are used inside some cryptographic algorithms, in digital signatures, message authentication codes,
+manipulation detection, fingerprints, checksums (message integrity check), hash tables, password storage and much more.
+ As a Python programmer you may need these functions to check for duplicate data or files, to check data integrity when
+  you transmit information over a network, to securely store passwords in databases, or maybe some work related to
+  cryptography.
+
+I want to make clear that hash functions are not a cryptographic protocol, they do not encrypt or decrypt information,
+ but they are a fundamental part of many cryptographic protocols and tools.

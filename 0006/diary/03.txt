@@ -1,0 +1,6 @@
+The hashlib module, included in The Python Standard library is a module containing an interface to the most popular
+hashing algorithms. hashlib implements some of the algorithms, however if you have OpenSSL installed, hashlib is able
+to use this algorithms as well.
+
+This code is made to work in Python 3.2 and above. If you want to run this examples in Python 2.x, just remove the
+algorithms_available and algorithms_guaranteed calls.

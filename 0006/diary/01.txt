@@ -1,0 +1,6 @@
+A hash function is a function that takes input of a variable length sequence of bytes and converts it to a fixed
+length sequence. It is a one way function. This means if f is the hashing function, calculating f(x) is pretty fast
+and simple, but trying to obtain x again will take years. The value returned by a hash function is often called a
+hash, message digest, hash value, or checksum. Most of the time a hash function will produce unique output for a
+given input. However depending on the algorithm, there is a possibility to find a collision due to the mathematical
+theory behind these functions.
